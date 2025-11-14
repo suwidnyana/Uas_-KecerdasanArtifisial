@@ -86,8 +86,8 @@ Uas-KecerdasanArtifisial/
 ## ⚙️ Catatan Penting
 
 - Proyek ini menggunakan backend Matplotlib non-GUI (Agg) agar kompatibel di semua sistem operasi.
-- Grafik fuzzy akan disimpan otomatis di folder `static/img/fuzzy_graph.png`.
-- Jangan gunakan server Flask ini untuk produksi. Gunakan server produksi yang sesuai jika hendak di-deploy.
+- 
+- 
 
 ---
 
