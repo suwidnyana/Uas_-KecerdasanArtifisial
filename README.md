@@ -57,8 +57,9 @@ pip install flask numpy matplotlib scikit-fuzzy
   ```
 
 2. Jalankan server Flask:
+```
 flask run
-
+```
 
 
 ---
