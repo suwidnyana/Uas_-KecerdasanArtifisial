@@ -1,0 +1,23 @@
+
+{% extends "base.html" %}
+
+{% block title %}Perhitungan Fuzzy{% endblock %}
+
+{% block content %}
+
+        <h2>Masukkan Data Permintaan dan Persediaan</h2>
+        <form action="/" method="post">
+            <label for="permintaan">Permintaan:</label>
+            <input type="number" id="permintaan" name="permintaan" required>
+
+            <label for="persediaan">Persediaan:</label>
+            <input type="number" id="persediaan" name="persediaan" required>
+
+            <button type="submit">Hitung</button>
+        </form>
+
+        {% if hasil is not none %}
+            <h3>Barang yang harus diproduksi: {{ hasil }}</h3>
+         {% endif %}
+
+{% endblock %}
