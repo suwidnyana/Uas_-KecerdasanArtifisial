@@ -20,5 +20,70 @@ Sebelum menjalankan proyek ini, pastikan kamu telah menginstal:
 ## 📦 Instalasi dan Setup
 
 1. Clone repository:
-git clone https://github.com/username/FuzzyPersediaan.git
-cd FuzzyPersediaan
+git clone https://github.com/suwidnyana/Uas_-KecerdasanArtifisial
+
+2. Buat dan aktifkan virtual environment:
+- **Windows:**
+  ```
+  python -m venv env_fuzzy_flask
+  .\env_fuzzy_flask\Scripts\activate
+  ```
+- **macOS/Linux:**
+  ```
+  python3 -m venv env_fuzzy_flask
+  source env_fuzzy_flask/bin/activate
+  ```
+
+3. Install dependencies:
+pip install -r requirements.txt
+pip install flask numpy matplotlib scikit-fuzzy
+
+
+---
+
+## 🚀 Menjalankan Aplikasi
+
+1. Set environment variable untuk Flask app:
+- **Windows:**
+  ```
+  set FLASK_APP=app.py
+  ```
+- **macOS/Linux:**
+  ```
+  export FLASK_APP=app.py
+  ```
+
+2. Jalankan server Flask:
+flask run
+
+
+
+---
+
+## 📂 Struktur Folder
+
+Uas_-KecerdasanArtifisial/
+│
+├── app.py
+├── static/
+│ └── img/
+│ └── fuzzy_graph.png
+├── templates/
+│ ├── index.html
+│ ├── base.html
+│ ├── grafik.html
+│ └── about.html
+└── README.md
+
+
+---
+
+## ⚙️ Catatan Penting
+
+- Proyek ini menggunakan backend Matplotlib non-GUI (Agg) agar kompatibel di semua sistem operasi.
+- Grafik fuzzy akan disimpan otomatis di folder `static/img/fuzzy_graph.png`.
+- Jangan gunakan server Flask ini untuk produksi. Gunakan server produksi yang sesuai jika hendak di-deploy.
+
+---
+
+Jika ada bagian yang ingin ditambahkan atau disesuaikan, silakan beri tahu.
