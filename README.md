@@ -92,5 +92,93 @@ Uas-KecerdasanArtifisial/
 - 
 
 ---
+# 🚀 Project Contribution Guide
 
-Jika ada bagian yang ingin ditambahkan atau disesuaikan, silakan beri tahu.
+Branch utama untuk development adalah **dev**. Semua fitur baru harus dibuat melalui branch `dev` diajukan melalui Pull Request ke branch `main`.
+
+---
+
+# 📥 1. Clone Repository
+```bash
+git clone https://github.com/suwidnyana/Uas_-KecerdasanArtifisial
+cd <Uas_-KecerdasanArtifisial>
+```
+
+---
+
+# 🌱 2. Checkout ke Branch `dev`
+```bash
+git fetch origin
+git checkout dev
+```
+Jika branch `dev` sudah ada di lokal:
+```bash
+git checkout -b dev origin/dev
+```
+
+---
+
+---
+
+# 🛠 3. Mulai Coding & Commit
+```bash
+git add .
+git commit -m "Add login page feature"
+```
+
+---
+
+# 🔄4. Update Branch Sebelum Push 
+
+
+```bash
+git pull origin dev
+```
+
+
+---
+
+# ⬆ 5. Push Branch ke GitHub
+Jika pertama kali push:
+```bash
+git push origin dev
+```
+
+Push selanjutnya:
+```bash
+git push
+```
+
+---
+
+# 🔀 7. Buat Pull Request ke `dev`
+Di GitHub:
+- **Base**: `dev`
+- **Compare**: branch fitur kamu
+
+Setelah di-review dan disetujui, baru merge.
+
+---
+
+# ♻ 8. Sinkronisasi Setelah PR Selesai
+Kembali ke dev dan update:
+```bash
+git checkout dev
+git pull origin dev
+```
+
+---
+
+# 🧩 Siklus Kerja
+1. Mulai dari `dev`
+2. Buat `feature/<fitur>`
+3. Coding → Commit
+4. Rebase dari `dev`
+5. Push
+6. PR → `dev`
+7. Merge setelah approved
+8. Update dev & ulangi
+
+---
+
+Jika kamu butuh **diagram workflow Git**, **template PR**, atau **rules branching**, bilang saja dan akan aku tambahkan.
