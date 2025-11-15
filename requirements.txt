@@ -20,7 +20,7 @@ six==1.17.0
 contourpy==1.1.1
 
 # --- FUZZY ---
-scikit-fuzzy==0.5.0
+scikit-fuzzy==0.4.2
 
 # --- COMPAT EXTRA ---
 MarkupSafe==3.0.2
@@ -29,4 +29,3 @@ importlib_resources==6.5.2
 zipp==3.21.0
 
 
-scipy==1.11.4
