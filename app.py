@@ -8,15 +8,19 @@ import os
 
 app = Flask(__name__)
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+
+# ----------------------------------------------------
+# SETUP FOLDER STATIC
+# ----------------------------------------------------
+if not os.path.exists('static/img'):
+    os.makedirs('static/img')
 
 
-# Buat folder static jika belum ada
-if not os.path.exists('static'):
-    os.makedirs('static')
 
+
+# ----------------------------------------------------
+# FUZZY SETUP
+# ----------------------------------------------------
 
 # Menyatakan universe dari variable
 permintaan_x = np.arange(0, 5001, 1)
@@ -149,6 +153,10 @@ def about():
     return render_template('about.html')
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
 
+
+# ----------------------------------------------------
+# LOCAL RUN ONLY
+# ----------------------------------------------------
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000, debug=True)
