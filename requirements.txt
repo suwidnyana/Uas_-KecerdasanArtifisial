@@ -28,4 +28,4 @@ importlib_metadata==8.6.1
 importlib_resources==6.5.2
 zipp==3.21.0
 
-
+setuptools==75.6.0
