@@ -1,23 +1,28 @@
-
 {% extends "base.html" %}
 
-{% block title %}Perhitungan Fuzzy{% endblock %}
+{% block title %}Fuzzy Penilaian Mobile Banking{% endblock %}
 
 {% block content %}
 
-        <h2>Masukkan Data Permintaan dan Persediaan</h2>
-        <form action="/" method="post">
-            <label for="permintaan">Permintaan:</label>
-            <input type="number" id="permintaan" name="permintaan" required>
+<h2>Penilaian Kualitas Layanan Mobile Banking</h2>
 
-            <label for="persediaan">Persediaan:</label>
-            <input type="number" id="persediaan" name="persediaan" required>
+<form action="/" method="post">
 
-            <button type="submit">Hitung</button>
-        </form>
+    <label for="rating">Rating Pengguna (0–5):</label>
+    <input type="number" step="0.1" name="rating" min="0" max="5" required>
 
-        {% if hasil is not none %}
-            <h3>Barang yang harus diproduksi: {{ hasil }}</h3>
-         {% endif %}
+    <label for="crash">Jumlah Crash per Hari (0–50):</label>
+    <input type="number" name="crash" min="0" max="50" required>
+
+    <label for="keluhan">Jumlah Keluhan per Hari (0–300):</label>
+    <input type="number" name="keluhan" min="0" max="300" required>
+
+    <button type="submit">Hitung Kualitas</button>
+</form>
+
+{% if hasil is not none %}
+    <h3>Skor Kualitas Layanan: {{ hasil }}</h3>
+    <img src="{{ url_for('static', filename='img/fuzzy_graph_new.png') }}" alt="grafik">
+{% endif %}
 
 {% endblock %}
