@@ -2,166 +2,157 @@ from flask import Flask, render_template, request
 import numpy as np
 import skfuzzy as fuzzy
 import matplotlib
-matplotlib.use('Agg')  # Backend non-GUI untuk menghindari error di macOS
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 
 app = Flask(__name__)
 
-
-# ----------------------------------------------------
-# SETUP FOLDER STATIC
-# ----------------------------------------------------
+# Folder grafik
 if not os.path.exists('static/img'):
     os.makedirs('static/img')
 
+# =============================
+# 1. Universe Variables
+# =============================
+rating_x  = np.arange(0, 5.01, 0.01)
+crash_x   = np.arange(0, 51, 1)
+keluhan_x = np.arange(0, 301, 1)
+quality_x = np.arange(0, 101, 1)
+
+# =============================
+# 2. Membership Function (NEW)
+# =============================
+
+# --- Rating ---
+rating_buruk = fuzzy.gaussmf(rating_x, 0.8, 0.6)
+rating_normal = fuzzy.gbellmf(rating_x, 1.2, 3, 2.5)
+rating_baik = fuzzy.gaussmf(rating_x, 4.3, 0.5)
+
+# --- Crash ---
+crash_rendah = fuzzy.sigmf(crash_x, 8, -0.3)
+crash_sedang = fuzzy.gaussmf(crash_x, 20, 6)
+crash_tinggi = fuzzy.sigmf(crash_x, 30, 0.3)
+
+# --- Keluhan ---
+keluhan_sedikit = fuzzy.trapmf(keluhan_x, [0, 0, 40, 80])
+keluhan_sedang = fuzzy.trapmf(keluhan_x, [60, 120, 160, 220])
+keluhan_banyak = fuzzy.trapmf(keluhan_x, [200, 240, 300, 300])
+
+# --- Quality ---
+quality_buruk = fuzzy.sigmf(quality_x, 30, -0.2)
+quality_cukup = fuzzy.gaussmf(quality_x, 55, 10)
+quality_baik = fuzzy.sigmf(quality_x, 70, 0.2)
+
+# =============================
+# 3. Generate GRAPH (New Style)
+# =============================
+def generate_graph():
+    plt.figure(figsize=(10, 12))
+
+    # Rating
+    plt.subplot(3, 1, 1)
+    plt.plot(rating_x, rating_buruk, label="Buruk")
+    plt.plot(rating_x, rating_normal, label="Normal")
+    plt.plot(rating_x, rating_baik, label="Baik")
+    plt.title("Rating Pengguna (Baru)")
+    plt.legend(); plt.grid(True)
+
+    # Crash
+    plt.subplot(3, 1, 2)
+    plt.plot(crash_x, crash_rendah, label="Rendah")
+    plt.plot(crash_x, crash_sedang, label="Sedang")
+    plt.plot(crash_x, crash_tinggi, label="Tinggi")
+    plt.title("Jumlah Crash (Baru)")
+    plt.legend(); plt.grid(True)
+
+    # Keluhan
+    plt.subplot(3, 1, 3)
+    plt.plot(keluhan_x, keluhan_sedikit, label="Sedikit")
+    plt.plot(keluhan_x, keluhan_sedang, label="Sedang")
+    plt.plot(keluhan_x, keluhan_banyak, label="Banyak")
+    plt.title("Jumlah Keluhan (Baru)")
+    plt.legend(); plt.grid(True)
+
+    plt.tight_layout()
+    plt.savefig("static/img/fuzzy_graph_new.png")
+    plt.close()
+
+generate_graph()
+
+# =============================
+# 4. Fuzzy Inference RULE BASE
+# =============================
+def fuzzy_inference(rating, crash, keluhan):
+
+    # Degree of membership
+    Rb = fuzzy.interp_membership(rating_x, rating_buruk, rating)
+    Rn = fuzzy.interp_membership(rating_x, rating_normal, rating)
+    Rk = fuzzy.interp_membership(rating_x, rating_baik, rating)
+
+    C_low = fuzzy.interp_membership(crash_x, crash_rendah, crash)
+    C_mid = fuzzy.interp_membership(crash_x, crash_sedang, crash)
+    C_high = fuzzy.interp_membership(crash_x, crash_tinggi, crash)
+
+    K_low = fuzzy.interp_membership(keluhan_x, keluhan_sedikit, keluhan)
+    K_mid = fuzzy.interp_membership(keluhan_x, keluhan_sedang, keluhan)
+    K_high = fuzzy.interp_membership(keluhan_x, keluhan_banyak, keluhan)
+
+    rules = []
+
+    # RULES (Baru)
+    rules.append( min(Rb, max(C_high, K_high)) )   # buruk
+    rules.append( min(Rb, K_mid) )                 # buruk
+    rules.append( min(Rn, C_high) )                # buruk
+
+    rules.append( min(Rn, C_mid) )                 # cukup
+    rules.append( min(Rn, K_mid) )                 # cukup
+
+    rules.append( min(Rk, C_low, K_low) )          # baik
+    rules.append( min(Rk, C_low) )                 # baik
+    rules.append( min(Rk, K_low) )                 # baik
+
+    # Mapping ke output
+    outputs = [
+        fuzzy.defuzz(quality_x, np.fmin(r, quality_buruk), 'centroid') if r>0 else 0 for r in rules[:3]
+    ] + [
+        fuzzy.defuzz(quality_x, np.fmin(r, quality_cukup), 'centroid') if r>0 else 0 for r in rules[3:5]
+    ] + [
+        fuzzy.defuzz(quality_x, np.fmin(r, quality_baik), 'centroid') if r>0 else 0 for r in rules[5:]
+    ]
+
+    # Weighted average
+    score = np.sum(np.array(rules) * np.array(outputs)) / (np.sum(rules) + 1e-9)
+    return score
 
 
-
-# ----------------------------------------------------
-# FUZZY SETUP
-# ----------------------------------------------------
-
-# Menyatakan universe dari variable
-permintaan_x = np.arange(0, 5001, 1)
-persediaan_x = np.arange(0, 601, 1)
-produksi_x  = np.arange(0, 7001, 1)
-
-# Generate fungsi keanggotaan fuzzy
-permintaan_turun = fuzzy.trapmf(permintaan_x, [0, 0, 1000, 5000])
-permintaan_naik = fuzzy.trapmf(permintaan_x, [1000, 5000, 5000, 5000])
-
-persediaan_sedikit = fuzzy.trapmf(persediaan_x, [0, 0, 100, 600])
-persediaan_banyak = fuzzy.trapmf(persediaan_x, [100, 600, 600, 600])
-
-produksi_berkurang  = fuzzy.trapmf(produksi_x, [0, 0, 2000, 7000])
-produksi_bertambah  = fuzzy.trapmf(produksi_x, [2000, 7000, 7000, 7000])
-
-
-# Membuat 3 grafik sekaligus
-fig, (ax0, ax1, ax2) = plt.subplots(nrows=3, figsize=(8, 9))
-
-# Grafik 1: Permintaan
-ax0.plot(permintaan_x, permintaan_turun, 'b', linewidth=1.5, label='Turun')
-ax0.plot(permintaan_x, permintaan_naik, 'g', linewidth=1.5, label='Naik')
-ax0.set_title('Permintaan')
-ax0.legend()
-
-# Grafik 2: Persediaan
-ax1.plot(persediaan_x, persediaan_sedikit, 'b', linewidth=1.5, label='Sedikit')
-ax1.plot(persediaan_x, persediaan_banyak, 'g', linewidth=1.5, label='Banyak')
-ax1.set_title('Persediaan')
-ax1.legend()
-
-# Grafik 3: Produksi
-ax2.plot(produksi_x, produksi_berkurang, 'b', linewidth=1.5, label='Berkurang')
-ax2.plot(produksi_x, produksi_bertambah, 'g', linewidth=1.5, label='Bertambah')
-ax2.set_title('Produksi')
-ax2.legend()
-
-# Menghilangkan garis atas dan kanan dari ketiga grafik
-for ax in (ax0, ax1, ax2):
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-
-plt.tight_layout()
-
-# Simpan gambar di folder static/img
-graph_path = 'static/img/fuzzy_graph.png'
-plt.savefig(graph_path)
-plt.close()
-
-    
-
+# =============================
+# 5. Flask Routes
+# =============================
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    hasil_produksi = None
+    result = None
 
     if request.method == 'POST':
-        try:
-            # Ambil input dari form
-            permintaan = int(request.form['permintaan'])
-            persediaan = int(request.form['persediaan'])
+        rating = float(request.form['rating'])
+        crash = float(request.form['crash'])
+        keluhan = float(request.form['keluhan'])
 
-            print(f"\nPermintaan: {permintaan}, Persediaan: {persediaan}")
+        score = fuzzy_inference(rating, crash, keluhan)
+        result = int(round(score))
 
-            # Menghitung derajat keanggotaan (miu) permintaan
-            miu_permintaan = [
-                fuzzy.interp_membership(permintaan_x, permintaan_turun, permintaan),
-                fuzzy.interp_membership(permintaan_x, permintaan_naik, permintaan)
-            ]
+    return render_template("index.html", hasil=result)
 
-            print(f"Derajat Keanggotaan Permintaan:")
-            print(f"  Turun: {miu_permintaan[0]}")
-            print(f"  Naik : {miu_permintaan[1]}")
-
-            # Menghitung derajat keanggotaan (miu) persediaan
-            miu_persediaan = [
-                fuzzy.interp_membership(persediaan_x, persediaan_sedikit, persediaan),
-                fuzzy.interp_membership(persediaan_x, persediaan_banyak, persediaan)
-            ]
-
-            print(f"Derajat Keanggotaan Persediaan:")
-            print(f"  Sedikit: {miu_persediaan[0]}")
-            print(f"  Banyak : {miu_persediaan[1]}")
-
-            # Proses inferensi menggunakan metode Tsukamoto
-            alpha1 = np.fmin(miu_permintaan[0], miu_persediaan[1])
-            z1 = fuzzy.interp_universe(produksi_x, produksi_berkurang, alpha1)
-            #z1 = np.interp(alpha1, produksi_berkurang, produksi_x)
-
-            alpha2 = np.fmin(miu_permintaan[0], miu_persediaan[0])
-            z2 = fuzzy.interp_universe(produksi_x, produksi_berkurang, alpha2)
-            #z2 = np.interp(alpha2, produksi_berkurang, produksi_x)
-
-            alpha3 = np.fmin(miu_permintaan[1], miu_persediaan[1])
-            z3 = fuzzy.interp_universe(produksi_x, produksi_bertambah, alpha3)
-            #z3 = np.interp(alpha3, produksi_bertambah, produksi_x)
-
-            alpha4 = np.fmin(miu_permintaan[1], miu_persediaan[0])
-            z4 = fuzzy.interp_universe(produksi_x, produksi_bertambah, alpha4)
-            #z4 = np.interp(alpha4, produksi_bertambah, produksi_x)
-
-            print(f"\nNilai Alpha dan Z:")
-            print(f"  Alpha1: {alpha1}, Z1: {z1}")
-            print(f"  Alpha2: {alpha2}, Z2: {z2}")
-            print(f"  Alpha3: {alpha3}, Z3: {z3}")
-            print(f"  Alpha4: {alpha4}, Z4: {z4}")
-
-            # Defuzzifikasi dengan rata-rata tertimbang
-            penyebut = alpha1 + alpha2 + alpha3 + alpha4
-            if penyebut == 0:
-                      hasil_produksi = 0  # atau nilai default, misalnya rata-rata
-            else:
-                      hasil_produksi = (alpha1 * z1[0] + alpha2 * z2[0] + alpha3 * z3[0] + alpha4 * z4[0]) / (alpha1 + alpha2 + alpha3 + alpha4)
-
-            hasil_produksi = int(hasil_produksi)  # Konversi ke integer
-
-            return render_template('index.html', hasil=hasil_produksi)
-
-        except ValueError:
-            return "Input harus berupa angka!"
-
-    return render_template('index.html', hasil=hasil_produksi)
 
 @app.route('/grafik')
 def grafik():
-    return render_template('grafik.html')
+    return render_template("grafik.html")
+
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    return render_template("about.html")
 
 
-
-
-# ----------------------------------------------------
-# LOCAL RUN ONLY
-# ----------------------------------------------------
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
-    
-    
-    
-    
+    app.run(host="0.0.0.0", port=5000, debug=True)
