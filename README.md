@@ -1,7 +1,12 @@
 # Fuzzy Persediaan - Sistem Logika Fuzzy untuk Produksi
 
-Proyek ini adalah implementasi sistem logika fuzzy menggunakan metode Tsukamoto untuk menentukan jumlah produksi berdasarkan permintaan dan persediaan. Dibangun dengan Python dan Flask, serta visualisasi menggunakan Matplotlib.
 
+Aplikasi ini digunakan untuk melakukan perhitungan <b>Fuzzy Logic</b> 
+    dalam menilai <b>Kualitas Layanan Mobile Banking</b> berdasarkan 
+    rating pengguna, jumlah crash, dan jumlah keluhan.  
+    <br><br>
+    Sistem ini juga dilengkapi visualisasi grafik fungsi keanggotaan untuk
+    memudahkan pengguna memahami bagaimana fuzzy bekerja.
 ---
 
 ## 🛠️ Persiapan Sebelum Menjalankan
